@@ -18,7 +18,7 @@ class WindowClass(QMainWindow):
         self.plainTextEdit.setStyleSheet("background-color: white;")
         self.previous_cursor_position = 0
         self.pushButton_2.clicked.connect(self.save_text)
-        self.payloads = None  # Initialize
+        self.payloads = None 
         self.scan_running = False
     
     def scan_startorstop(self):
@@ -30,18 +30,14 @@ class WindowClass(QMainWindow):
             self.scan_stop()
         
     def save_text(self):
-        # Open a file dialog to choose the save location
         file_path, _ = QFileDialog.getSaveFileName(self, "Save Text File", "", "Text files (*.txt)")
 
         if file_path:
-            # Get the plain text content from plainTextEdit
             text_content = self.plainTextEdit.toPlainText()
 
-            # Save the text content to the selected file
             with open(file_path, 'w', encoding='utf-8') as file:
                 file.write(text_content)
 
-            # Inform the user that the file has been saved
             self.statusBar().showMessage(f"Text saved to {file_path}")
 
     def read_payloads_from_file(self, file_path):
@@ -51,7 +47,6 @@ class WindowClass(QMainWindow):
     def read_payload(self):
         self.progressBar.setValue(0)
 
-         # Payload 읽기
         payloads_file, _ = QFileDialog.getOpenFileName(self, "Select a wordlist for fuzzing", "", "Text files (*.txt)")
         if not payloads_file:
             self.plainTextEdit.setPlainText("Fuzzing aborted: No wordlist selected.")
@@ -69,12 +64,10 @@ class WindowClass(QMainWindow):
         self.loading_timer.timeout.connect(self.update_loading)
         self.loading_timer.start(100)
 
-        # default payload
         if self.payloads is None:
             default_payload_file = "xss_vectors.txt"
             self.payloads = self.read_payloads_from_file(default_payload_file)
 
-        # Send the parameters to the fuzzer module
         from fuzzer_module import Fuzzer
         self.fuzzer_instance = Fuzzer(self, url)
         self.fuzzer_instance.perform_fuzzing(self.payloads)
@@ -85,21 +78,17 @@ class WindowClass(QMainWindow):
             self.fuzzer_instance.cancel_fuzzing()
 
     def show_vulnerability_message(self, message):
-        # QTextCharFormat - 텍스트 스타일 지정
         format = QTextCharFormat()
         format.setForeground(QColor("red"))
 
-        # QTextCursor - 현재 텍스트 커서 설정
         cursor = self.plainTextEdit.textCursor()
         cursor.movePosition(QTextCursor.End)
 
-        # 현재 커서 위치 저장
         self.previous_cursor_position = cursor.position()
 
         cursor.insertText(message, format)
         cursor.insertBlock()  
 
-        # 새로운 색상 적용된 텍스트 표시
         self.plainTextEdit.setTextCursor(cursor)
 
     def getSelectedRadioButton(self, layout):
