@@ -29,7 +29,7 @@ def parse_forms(forms):
             form_data['method'] = form['method'] if form.has_attr('method') else None
             form_data['inputs'] = [inputs for inputs in form.find_all('input')]
             result.append(form_data)
-        except:  # 가져올게 없는 경우
+        except: 
             continue
     return result
 
@@ -44,12 +44,12 @@ def fuzz(payloads, input_elem, url, method, delay):
         else:
             response = requests.post(url, data={input_elem['name']: script}).text
 
-        if script in response:  # 취약점 판별 기준
+        if script in response:
             vuln_count += 1
             vuln_list.append([input_elem, script])
             print(f"\033[91m[+] Vulnerability found!\033[0m\n")
 
-        if delay is not None:  # 딜레이 옵션 여부
+        if delay is not None:
             time.sleep(delay)
 
 
@@ -107,14 +107,11 @@ def create_docx_with_hello(file_path, url, most_common_string):
 
     doc = Document()
 
-    # 첫 번째 문단 추가
     paragraph1 = doc.add_paragraph(f"\"{url}\"에서의 취약점 스캔 결과로 Reflected XSS 취약점이 발견되었습니다.")
     
-    # 첫 번째 문단에 Bold 효과 추가
     run1 = paragraph1.runs[0]
     run1.font.bold = True
 
-    # 나머지 문단들 추가
     doc.add_paragraph("    Reflected XSS 공격은 악성 스크립트가 포함된 URL을 사용자가 클릭하도록 유도하여 URL을 클릭하면 클라이언트를 공격하는 방식으로 동작합니다. 일반적으로 서버에 검색 내용을 입력하면, 검색 결과가 있는 경우에는 결과 값을 사용자에게 전달하지만, 서버에서 정확한 결과가 없는 경우 서버는 브라우저에 입력한 값을 그대로 HTML 문서에 포함하여 응답합니다. 이 경우 HTML 페이지에 포함된 악성 스크립트가 브라우저에서 실행이 됩니다.")    
     doc.add_paragraph(f"    현재 스캐닝을 진행한 웹사이트에서는 {most_common_string} 부분에서 가장 많은 취약점이 발견되었습니다. 이는 세선ID 유출, 시스템 관리자 권한 탈취, 악성코드 유포 등 보다 확대된 피해를 낳을 수도 있습니다. 그러므로 아래와 같은 조치를 시행하는 것을 권장합니다.\n")
 
@@ -134,7 +131,6 @@ def create_docx_with_hello(file_path, url, most_common_string):
     for run in paragraph4.runs:
         run.font.size = Pt(14)
 
-    # 6번째 문단의 글자 크기를 14로 설정
     paragraph6 = doc.paragraphs[5]
     for run in paragraph6.runs:
         run.font.size = Pt(14)
@@ -146,8 +142,12 @@ input_str = input("> ")
 inputSplit = input_str.split()
 url = inputSplit[0]
 options = inputSplit[1:]
-delay = None  # 딜레이 초
-payloads_file = "xss_vectors.txt"  # 기본 페이로드 파일
+delay = None 
+
+script_path = os.path.abspath(__file__)
+dirname = os.path.dirname(script_path)
+payloads_file = os.path.join(dirname, "xss_vectors.txt")
+
 
 if "-t" in options:
     delay_idx = options.index("-t") + 1
@@ -157,7 +157,6 @@ if "-c" in options:
     file_idx = options.index("-c") + 1
     payloads_file = options[file_idx]
 
-# 파일 경로 생성
 dirname = os.path.dirname(os.path.abspath(__file__))
 webpage = url_to_html(url)
 forms = extract_forms(webpage)
@@ -165,7 +164,6 @@ parsed_forms = parse_forms(forms)
 
 print("\n===== Start scanning vulnerabilities =====\n")
 
-# 파일에서 페이로드 읽어오기
 payloads = read_payloads_from_file(payloads_file)
 
 for form in parsed_forms:
