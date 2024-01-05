@@ -20,7 +20,6 @@ class Fuzzer:
 
     def extract_forms(self):
         self.logger.debug("Extracting forms from the target URL.")
-    # 나머지 코드는 동일 
         page = requests.get(self.url)
         soup = BeautifulSoup(page.text, "html.parser")
         return soup.find_all("form")
@@ -35,20 +34,19 @@ class Fuzzer:
                 form_data['method'] = form['method'] if form.has_attr('method') else None
                 form_data['inputs'] = [inputs for inputs in form.find_all('input')]
                 result.append(form_data)
-            except:  # 가져올게 없는 경우
+            except: 
                 continue
         return result
 
     def fuzz(self, payloads, input_elem, method):
         total_payloads = len(payloads)
 
-        # 추가: 중단된 페이로드의 인덱스부터 반복
         for i in range(self.current_payload_index, total_payloads):
-            if self.cancelled:  # 추가: 스캔이 중지되었다면 루프 종료
+            if self.cancelled: 
                 break
 
             script = payloads[i]
-            self.current_vuln_count += 1  # 추가: 중단된 지점의 번호 증가
+            self.current_vuln_count += 1  
             self.window_instance.plainTextEdit.appendPlainText(f"[{self.current_vuln_count}] Testing script: {script}")
 
             if method.lower() == "get":
@@ -67,11 +65,9 @@ class Fuzzer:
             progress_value = int((i + 1) / total_payloads * 100)
             self.window_instance.progressBar.setValue(progress_value)
 
-            # 추가: 일정 시간 동안 잠시 중지
             QCoreApplication.processEvents()
             time.sleep(0.1)
 
-        # 추가: 모든 페이로드를 테스트했을 때 중단된 지점 업데이트
         self.current_payload_index = i + 1
 
     def perform_fuzzing(self, payloads):
@@ -81,7 +77,7 @@ class Fuzzer:
         self.window_instance.plainTextEdit.appendPlainText("\n===== Start scanning vulnerabilities =====\n")
 
         for form in parsed_forms:
-            if self.cancelled:  # 추가: 스캔이 중지되었다면 루프 종료
+            if self.cancelled: 
                 break
 
             try:
@@ -89,7 +85,6 @@ class Fuzzer:
                 inputs = form['inputs']
                 for input_elem in inputs:
                     self.fuzz(payloads, input_elem, method)
-                    # 추가: 중단된 지점 업데이트
                     QCoreApplication.processEvents()
             except:
                 continue
